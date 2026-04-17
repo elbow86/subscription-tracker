@@ -1,15 +1,17 @@
 # Subscription Tracker
 
 ## Overview
-The Subscription Tracker is a single-page web application designed to help users manage their subscriptions efficiently. Users can add, remove, and view their subscriptions in a user-friendly interface.
+The Subscription Tracker is a single-page web application designed to help users manage their subscriptions efficiently. Users can add, remove, and view their subscriptions in a user-friendly interface. The app now serves the frontend through a small Node server and persists subscriptions in a lightweight embedded database file.
 
 ## Project Structure
 ```
 subscription-tracker
+├── data                     # Embedded database files created at runtime (gitignored)
+├── server.js                # Express server and database API
 ├── src
 │   ├── index.html          # Main HTML document for the application
 │   ├── styles
-│   │   └── main.css       # Styles for the application
+│   │   └── main.css        # Styles for the application
 │   ├── scripts
 │   │   ├── app.js         # Main JavaScript file for application logic
 │   │   ├── subscription.js # Logic related to subscription management
@@ -22,6 +24,7 @@ subscription-tracker
 
 ## Features
 - Add new subscriptions
+- Edit existing subscriptions
 - Remove existing subscriptions
 - View a list of all subscriptions
 - User-friendly interface with intuitive navigation
@@ -51,10 +54,12 @@ subscription-tracker
 ```bash
 npm start
 ```
-This will start a local development server and automatically open the app in your default browser.
+This starts the local Node server, serves the frontend, and creates the local database file at `data/subscriptions.nedb` the first time you save data.
 
 #### Option 2: Direct File Access
-Open `src/index.html` directly in your web browser by double-clicking the file or using:
+Direct file access is no longer recommended because the app now uses a local API for database persistence. Use `npm start` instead.
+
+If you still want to open the HTML directly for layout work only, use:
 ```bash
 # Windows
 start src/index.html
@@ -66,13 +71,15 @@ open src/index.html
 xdg-open src/index.html
 ```
 
-The application will be available at `http://localhost:8080` (or the port specified in your configuration).
+The application will be available at `http://localhost:3000` by default.
 
 ## Usage
 Once the application is running, you can:
 - Add subscriptions by entering the details in the provided form.
 - Remove subscriptions by selecting them from the list.
 - View all your subscriptions in a clear and organized manner.
+
+If you already had subscriptions stored in browser `localStorage`, the app will migrate them into the embedded database the first time it loads against the new server.
 
 ## Contributing
 Contributions are welcome! Please submit a pull request or open an issue for any suggestions or improvements.

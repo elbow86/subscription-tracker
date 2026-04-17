@@ -127,6 +127,12 @@ h1 {
     gap: 16px;
 }
 
+.form-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
 .field {
     display: grid;
     gap: 8px;
@@ -169,6 +175,17 @@ input:focus {
     box-shadow: 0 16px 40px rgba(242, 106, 46, 0.3);
 }
 
+.button-secondary {
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--border);
+    box-shadow: none;
+}
+
+.button-secondary:hover {
+    box-shadow: none;
+}
+
 .panel-header {
     display: flex;
     align-items: baseline;
@@ -203,6 +220,12 @@ input:focus {
     gap: 12px;
 }
 
+.subscription-item-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
 .subscription-name {
     font-weight: 600;
     font-size: 1.1rem;
@@ -233,6 +256,16 @@ input:focus {
 .subscription-item .delete-button {
     color: var(--ink);
     border-color: var(--border);
+}
+
+.edit-button {
+    background: rgba(31, 122, 140, 0.1);
+    border: 1px solid rgba(31, 122, 140, 0.18);
+    color: var(--teal);
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    cursor: pointer;
 }
 
 .empty-state {
