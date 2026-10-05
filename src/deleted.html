@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deleted Subscriptions - Subscription Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <div class="page">
+        <header class="hero">
+            <div class="hero-copy">
+                <p class="eyebrow"><a href="/" class="back-link">← Back to Subscriptions</a></p>
+                <h1>Deleted Subscriptions</h1>
+                <p class="lede">View all subscriptions that have been removed from your tracking list.</p>
+            </div>
+        </header>
+
+        <main class="content">
+            <section class="panel list-panel">
+                <div class="panel-header">
+                    <h2>Recently Deleted</h2>
+                    <p id="deleted-count">0 deleted subscriptions</p>
+                </div>
+                <div id="deleted-list" class="subscription-list">
+                    <div class="empty-state">
+                        <p>No deleted subscriptions yet.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="scripts/deleted.js"></script>
+</body>
+</html>

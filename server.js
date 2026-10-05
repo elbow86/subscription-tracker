@@ -7,11 +7,18 @@ const app = express();
 const port = Number.parseInt(process.env.PORT ?? '3000', 10);
 const dataDirectory = path.join(__dirname, 'data');
 const databasePath = path.join(dataDirectory, 'subscriptions.nedb');
+const deletedDatabasePath = path.join(dataDirectory, 'deleted-subscriptions.nedb');
 
 fs.mkdirSync(dataDirectory, { recursive: true });
 
 const db = Datastore.create({
     filename: databasePath,
+    autoload: true,
+    timestampData: true
+});
+
+const deletedDb = Datastore.create({
+    filename: deletedDatabasePath,
     autoload: true,
     timestampData: true
 });
@@ -22,6 +29,11 @@ app.use(express.static(path.join(__dirname, 'src')));
 app.get('/api/subscriptions', async (_request, response) => {
     const rows = await db.find({}).sort({ createdAt: -1, _id: -1 });
 
+    response.json(rows.map(toSubscriptionResponse));
+});
+
+app.get('/api/subscriptions/costs', async (_request, response) => {
+    const rows = await db.find({}).sort({ price: -1, _id: -1 });
     response.json(rows.map(toSubscriptionResponse));
 });
 
@@ -94,14 +106,50 @@ app.put('/api/subscriptions/:id', async (request, response) => {
 });
 
 app.delete('/api/subscriptions/:id', async (request, response) => {
-    const deletedCount = await db.remove({ id: request.params.id }, {});
+    const subscription = await db.findOne({ id: request.params.id });
+    
+    if (!subscription) {
+        response.status(404).json({ error: 'Subscription not found.' });
+        return;
+    }
 
+    const deletedCount = await db.remove({ id: request.params.id }, {});
+    
     if (deletedCount === 0) {
         response.status(404).json({ error: 'Subscription not found.' });
         return;
     }
 
+    // Store the deleted subscription
+    const deletedSubscription = {
+        ...subscription,
+        deletedAt: new Date()
+    };
+    
+    try {
+        await deletedDb.insert(deletedSubscription);
+    } catch (error) {
+        console.error('Failed to store deleted subscription', error);
+    }
+
     response.status(204).send();
+});
+
+app.get('/api/subscriptions/deleted', async (_request, response) => {
+    const rows = await deletedDb.find({}).sort({ deletedAt: -1, _id: -1 });
+    response.json(rows.map(toSubscriptionResponse));
+});
+
+app.get(['/', '/index.html'], (_request, response) => {
+    response.sendFile(path.join(__dirname, 'src', 'index.html'));
+});
+
+app.get('/chart.html', (_request, response) => {
+    response.sendFile(path.join(__dirname, 'src', 'chart.html'));
+});
+
+app.get('/deleted.html', (_request, response) => {
+    response.sendFile(path.join(__dirname, 'src', 'deleted.html'));
 });
 
 app.get('/{*path}', (_request, response) => {
@@ -112,6 +160,7 @@ void startServer();
 
 async function startServer() {
     await db.ensureIndex({ fieldName: 'id', unique: true });
+    await deletedDb.ensureIndex({ fieldName: 'id', unique: true });
 
     app.listen(port, () => {
         console.log(`Subscription Tracker listening on http://localhost:${port}`);
@@ -119,7 +168,7 @@ async function startServer() {
 }
 
 function toSubscriptionResponse(document) {
-    return {
+    const response = {
         id: document.id,
         name: document.name,
         price: document.price,
@@ -128,6 +177,13 @@ function toSubscriptionResponse(document) {
         plusTax: document.plusTax ?? false,
         notes: document.notes ?? ''
     };
+    
+    // Include deletedAt if it exists (for deleted subscriptions)
+    if (document.deletedAt) {
+        response.deletedAt = document.deletedAt;
+    }
+    
+    return response;
 }
 
 function parseSubscriptionInput(payload) {

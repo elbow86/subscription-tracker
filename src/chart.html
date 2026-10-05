@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Costs Chart - Subscription Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/main.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="page">
+        <header class="hero">
+            <div class="hero-copy">
+                <p class="eyebrow"><a href="/" class="back-link">← Back to Subscriptions</a></p>
+                <h1>Subscription Costs Ranking</h1>
+                <p class="lede">Bar chart showing subscriptions ranked by annual cost from highest to lowest.</p>
+            </div>
+        </header>
+
+        <main class="content">
+            <section class="panel chart-panel">
+                <h2>Annual Cost Ranking</h2>
+                <div class="chart-container">
+                    <canvas id="costChart"></canvas>
+                </div>
+            </section>
+        </main>
+
+        <section class="summary">
+            <div class="summary-card">
+                <p class="summary-label">Total Subscriptions</p>
+                <p class="summary-value" id="total-count">0</p>
+            </div>
+            <div class="summary-card">
+                <p class="summary-label">Highest Cost</p>
+                <p class="summary-value" id="highest-cost">$0</p>
+            </div>
+            <div class="summary-card">
+                <p class="summary-label">Lowest Cost</p>
+                <p class="summary-value" id="lowest-cost">$0</p>
+            </div>
+        </section>
+    </div>
+    <script src="scripts/chart.js"></script>
+</body>
+</html>

@@ -276,6 +276,61 @@ input:focus, select:focus, textarea:focus {
     text-align: center;
 }
 
+.nav-links {
+    display: flex;
+    gap: 16px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+}
+
+.nav-link {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--ink);
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+}
+
+.back-link {
+    color: var(--teal);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+
+.chart-panel {
+    min-height: 500px;
+}
+
+.chart-container {
+    height: 400px;
+    margin-top: 20px;
+}
+
+.deleted-item {
+    opacity: 0.8;
+    border-left: 4px solid var(--accent);
+}
+
+.deleted-date {
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-style: italic;
+}
+
 .summary {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
