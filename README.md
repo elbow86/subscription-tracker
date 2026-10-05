@@ -1,5 +1,7 @@
 # Subscription Tracker
 
+See the [Changelog](CHANGELOG.md) for recent changes and fixes.
+
 ## Overview
 The Subscription Tracker is a single-page web application designed to help users manage their subscriptions efficiently. Users can add, remove, and view their subscriptions in a user-friendly interface. The app now serves the frontend through a small Node server and persists subscriptions in a lightweight embedded database file.
 

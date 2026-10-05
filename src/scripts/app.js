@@ -7,10 +7,33 @@ const state = {
     editingId: null
 };
 
-const formatter = new Intl.NumberFormat(undefined, {
-    style: 'currency',
-    currency: 'USD'
-});
+function formatMoney(amount, currency = 'UNK') {
+    if (amount === null) return 'Unknown';
+    const number = new Intl.NumberFormat('en-CA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount);
+    return `${['CAD', 'USD'].includes(currency) ? currency : 'Unconfirmed currency'} ${number}`;
+}
+
+function costTotals(lifetime = false) {
+    const totals = new Map();
+    let unconfirmed = 0;
+    for (const subscription of subscriptions) {
+        if (subscription.price === null || (lifetime && subscription.years === null)) continue;
+        const currency = subscription.currency ?? 'UNK';
+        if (!['CAD', 'USD'].includes(currency)) {
+            unconfirmed += 1;
+            continue;
+        }
+        const total = totals.get(currency) ?? { amount: 0, plusTax: false };
+        total.amount += subscription.price * (lifetime ? subscription.years : 1);
+        total.plusTax ||= subscription.plusTax;
+        totals.set(currency, total);
+    }
+    const lines = [...totals].sort(([a], [b]) => a.localeCompare(b)).map(([currency, total]) =>
+        `${formatMoney(total.amount, currency)}${total.plusTax ? ' + tax' : ''}`
+    );
+    if (unconfirmed) lines.push(`${unconfirmed} with unconfirmed currency excluded`);
+    return lines.join('\n') || 'No known costs';
+}
 
 const elements = {
     form: document.getElementById('subscription-form'),
@@ -18,6 +41,9 @@ const elements = {
     name: document.getElementById('subscription-name'),
     price: document.getElementById('subscription-price'),
     years: document.getElementById('subscription-years'),
+    currency: document.getElementById('subscription-currency'),
+    plusTax: document.getElementById('subscription-plus-tax'),
+    notes: document.getElementById('subscription-notes'),
     submitButton: document.getElementById('form-submit-button'),
     cancelButton: document.getElementById('form-cancel-button'),
     list: document.getElementById('subscription-list'),
@@ -80,18 +106,22 @@ async function initialize() {
 
 async function handleSubmitSubscription() {
     const name = elements.name.value.trim();
-    const price = Number.parseFloat(elements.price.value);
-    const years = Number.parseInt(elements.years.value, 10);
+    const price = elements.price.value === '' ? null : Number(elements.price.value);
+    const years = elements.years.value === '' ? null : Number(elements.years.value);
+    const currency = elements.currency.value;
+    const plusTax = elements.plusTax.checked;
+    const notes = elements.notes.value;
 
-    if (!name || Number.isNaN(price) || Number.isNaN(years)) {
+    if (!name || (price !== null && (!Number.isFinite(price) || price < 0)) ||
+        (years !== null && (!Number.isInteger(years) || years < 0))) {
         return;
     }
 
     try {
         if (state.editingId) {
-            await updateSubscription(state.editingId, { name, price, years });
+            await updateSubscription(state.editingId, { name, price, years, currency, plusTax, notes });
         } else {
-            await createSubscription({ name, price, years });
+            await createSubscription({ name, price, years, currency, plusTax, notes });
         }
     } catch (error) {
         console.warn('Failed to save subscription to the database', error);
@@ -128,22 +158,34 @@ function renderSubscriptions() {
             const item = document.createElement('article');
             item.className = 'subscription-item';
 
-            const lifetime = subscription.price * subscription.years;
+            const lifetime = subscription.price === null || subscription.years === null
+                ? null : subscription.price * subscription.years;
 
             item.innerHTML = `
                 <div class="subscription-item-header">
-                    <div class="subscription-name">${subscription.name}</div>
+                    <div class="subscription-name"></div>
                     <div class="subscription-item-actions">
-                        <button class="edit-button" data-action="edit" data-id="${subscription.id}">Edit</button>
-                        <button class="delete-button" data-action="delete" data-id="${subscription.id}">Remove</button>
+                        <button class="edit-button" data-action="edit">Edit</button>
+                        <button class="delete-button" data-action="delete">Remove</button>
                     </div>
                 </div>
                 <div class="subscription-metrics">
-                    <div class="metric">Price/year: <strong>${formatter.format(subscription.price)}</strong></div>
-                    <div class="metric">Years owned: <strong>${subscription.years}</strong></div>
-                    <div class="metric">Lifetime cost: <strong>${formatter.format(lifetime)}</strong></div>
+                    <div class="metric">Price/year: <strong class="annual-price"></strong></div>
+                    <div class="metric">Years owned: <strong class="years-owned"></strong></div>
+                    <div class="metric">Estimated lifetime cost: <strong class="lifetime-price"></strong></div>
                 </div>
+                <p class="subscription-notes"></p>
             `;
+
+            item.querySelector('.subscription-name').textContent = subscription.name;
+            const taxSuffix = subscription.plusTax && subscription.price !== null ? ' + tax' : '';
+            item.querySelector('.annual-price').textContent = formatMoney(subscription.price, subscription.currency) + taxSuffix;
+            item.querySelector('.years-owned').textContent = subscription.years ?? 'Unknown';
+            item.querySelector('.lifetime-price').textContent = formatMoney(lifetime, subscription.currency) + (lifetime === null ? '' : taxSuffix);
+            item.querySelector('.subscription-notes').textContent = subscription.notes ?? '';
+            item.querySelectorAll('button[data-action]').forEach((button) => {
+                button.dataset.id = subscription.id;
+            });
 
             elements.list.appendChild(item);
         });
@@ -154,20 +196,15 @@ function renderSubscriptions() {
 
 function updateSummary() {
     const count = subscriptions.length;
-    const totalAnnual = subscriptions.reduce((sum, subscription) => sum + subscription.price, 0);
-    const totalLifetime = subscriptions.reduce(
-        (sum, subscription) => sum + subscription.price * subscription.years,
-        0
-    );
-    const averageYears = count === 0
-        ? 0
-        : Math.round(subscriptions.reduce((sum, sub) => sum + sub.years, 0) / count);
+    const knownYears = subscriptions.filter((subscription) => subscription.years !== null);
+    const averageYears = knownYears.length === 0 ? 'Unknown'
+        : Math.round(knownYears.reduce((sum, sub) => sum + sub.years, 0) / knownYears.length).toString();
 
-    elements.count.textContent = `${count} active subscription${count === 1 ? '' : 's'}`;
-    elements.summaryAnnual.textContent = formatter.format(totalAnnual);
-    elements.summaryLifetime.textContent = formatter.format(totalLifetime);
-    elements.summaryYears.textContent = averageYears.toString();
-    elements.heroTotal.textContent = formatter.format(totalLifetime);
+    elements.count.textContent = `${count} tracked subscription${count === 1 ? '' : 's'}`;
+    elements.summaryAnnual.textContent = costTotals();
+    elements.summaryLifetime.textContent = costTotals(true);
+    elements.summaryYears.textContent = averageYears;
+    elements.heroTotal.textContent = costTotals(true);
 }
 
 async function loadSubscriptions() {
@@ -301,8 +338,11 @@ function beginEditing(id) {
     elements.submitButton.textContent = 'Save changes';
     elements.cancelButton.hidden = false;
     elements.name.value = subscription.name;
-    elements.price.value = subscription.price.toString();
-    elements.years.value = subscription.years.toString();
+    elements.price.value = subscription.price ?? '';
+    elements.years.value = subscription.years ?? '';
+    elements.currency.value = subscription.currency ?? 'UNK';
+    elements.plusTax.checked = subscription.plusTax ?? false;
+    elements.notes.value = subscription.notes ?? '';
     elements.name.focus();
 }
 

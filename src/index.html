@@ -19,7 +19,7 @@
             </div>
             <div class="hero-card">
                 <div class="hero-card-value" id="hero-total">$0</div>
-                <div class="hero-card-label">Total lifetime spend</div>
+                <div class="hero-card-label">Estimated lifetime cost at current prices</div>
             </div>
         </header>
 
@@ -33,11 +33,24 @@
                     </label>
                     <label class="field">
                         <span>Price per year</span>
-                        <input type="number" id="subscription-price" min="0" step="0.01" placeholder="120.00" required>
+                        <input type="number" id="subscription-price" min="0" step="0.01" placeholder="Unknown if blank">
+                    </label>
+                    <label class="field">
+                        <span>Currency</span>
+                        <select id="subscription-currency">
+                            <option value="CAD">CAD</option>
+                            <option value="USD">USD</option>
+                            <option value="UNK">Unconfirmed</option>
+                        </select>
+                    </label>
+                    <label><input type="checkbox" id="subscription-plus-tax"> Additional tax applies</label>
+                    <label class="field">
+                        <span>Billing notes</span>
+                        <textarea id="subscription-notes" rows="3"></textarea>
                     </label>
                     <label class="field">
                         <span>Years owned</span>
-                        <input type="number" id="subscription-years" min="0" step="1" placeholder="3" required>
+                        <input type="number" id="subscription-years" min="0" step="1" placeholder="Unknown if blank">
                     </label>
                     <div class="form-actions">
                         <button type="submit" class="button" id="form-submit-button">Add subscription</button>
@@ -61,18 +74,19 @@
 
         <section class="summary">
             <div class="summary-card">
-                <p class="summary-label">Total yearly cost</p>
+                <p class="summary-label">Known yearly cost by currency</p>
                 <p class="summary-value" id="summary-annual">$0</p>
             </div>
             <div class="summary-card">
-                <p class="summary-label">Total lifetime cost</p>
+                <p class="summary-label">Estimated lifetime cost at current prices</p>
                 <p class="summary-value" id="summary-lifetime">$0</p>
             </div>
             <div class="summary-card">
-                <p class="summary-label">Average years owned</p>
+                <p class="summary-label">Average known years owned</p>
                 <p class="summary-value" id="summary-years">0</p>
             </div>
         </section>
+        <p class="lede">Unknown prices, unconfirmed currencies and unknown ownership durations are excluded from the corresponding totals. No exchange-rate conversion is applied.</p>
     </div>
     <script src="scripts/app.js"></script>
 </body>

@@ -5,8 +5,9 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "dev": "node --watch server.js",
     "build": "echo 'Build step not defined'",
-    "test": "echo 'Test step not defined'"
+    "test": "node --test"
   },
   "keywords": [
     "subscription",

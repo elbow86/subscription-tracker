@@ -36,7 +36,10 @@ app.post('/api/subscriptions', async (request, response) => {
         id: validation.value.id,
         name: validation.value.name,
         price: validation.value.price,
-        years: validation.value.years
+        years: validation.value.years,
+        currency: validation.value.currency,
+        plusTax: validation.value.plusTax,
+        notes: validation.value.notes
     };
 
     try {
@@ -70,7 +73,10 @@ app.put('/api/subscriptions/:id', async (request, response) => {
         id: validation.value.id,
         name: validation.value.name,
         price: validation.value.price,
-        years: validation.value.years
+        years: validation.value.years,
+        currency: validation.value.currency,
+        plusTax: validation.value.plusTax,
+        notes: validation.value.notes
     };
 
     const updatedCount = await db.update(
@@ -117,25 +123,32 @@ function toSubscriptionResponse(document) {
         id: document.id,
         name: document.name,
         price: document.price,
-        years: document.years
+        years: document.years,
+        currency: document.currency ?? 'UNK',
+        plusTax: document.plusTax ?? false,
+        notes: document.notes ?? ''
     };
 }
 
 function parseSubscriptionInput(payload) {
-    const { id, name, price, years } = payload ?? {};
+    const { id, name, price, years, currency = 'UNK', plusTax = false, notes = '' } = payload ?? {};
 
     if (typeof name !== 'string' || name.trim() === '') {
         return { error: 'Name is required.' };
     }
 
-    const parsedPrice = Number(price);
-    if (!Number.isFinite(parsedPrice) || parsedPrice < 0) {
+    const parsedPrice = price === null ? null : Number(price);
+    if (parsedPrice !== null && (!Number.isFinite(parsedPrice) || parsedPrice < 0)) {
         return { error: 'Price must be a non-negative number.' };
     }
 
-    const parsedYears = Number(years);
-    if (!Number.isInteger(parsedYears) || parsedYears < 0) {
+    const parsedYears = years === null ? null : Number(years);
+    if (parsedYears !== null && (!Number.isInteger(parsedYears) || parsedYears < 0)) {
         return { error: 'Years must be a non-negative integer.' };
+    }
+
+    if (!['CAD', 'USD', 'UNK'].includes(currency) || typeof plusTax !== 'boolean' || typeof notes !== 'string') {
+        return { error: 'Invalid currency, tax qualifier, or notes.' };
     }
 
     return {
@@ -143,7 +156,10 @@ function parseSubscriptionInput(payload) {
             id: typeof id === 'string' && id.trim() !== '' ? id : crypto.randomUUID(),
             name: name.trim(),
             price: parsedPrice,
-            years: parsedYears
+            years: parsedYears,
+            currency,
+            plusTax,
+            notes: notes.trim()
         }
     };
 }
