@@ -51,7 +51,8 @@ const elements = {
     summaryAnnual: document.getElementById('summary-annual'),
     summaryLifetime: document.getElementById('summary-lifetime'),
     summaryYears: document.getElementById('summary-years'),
-    heroTotal: document.getElementById('hero-total')
+    heroTotal: document.getElementById('hero-total'),
+    heroLifetime: document.getElementById('hero-lifetime')
 };
 
 elements.form.addEventListener('submit', (event) => {
@@ -204,7 +205,8 @@ function updateSummary() {
     elements.summaryAnnual.textContent = costTotals();
     elements.summaryLifetime.textContent = costTotals(true);
     elements.summaryYears.textContent = averageYears;
-    elements.heroTotal.textContent = costTotals(true);
+    elements.heroTotal.textContent = costTotals();
+    elements.heroLifetime.textContent = costTotals(true);
 }
 
 async function loadSubscriptions() {
