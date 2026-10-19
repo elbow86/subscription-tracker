@@ -211,46 +211,58 @@ input:focus, select:focus, textarea:focus {
 
 .subscription-list {
     display: grid;
-    gap: 16px;
+    gap: 6px;
 }
 
 .subscription-item {
     background: #fffdf8;
-    padding: 18px;
-    border-radius: 18px;
+    padding: 9px 14px;
+    border-radius: 12px;
     border: 1px solid rgba(22, 22, 22, 0.08);
-    display: grid;
-    gap: 12px;
 }
 
-.subscription-item-header {
+.subscription-row {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     gap: 12px;
-}
-
-.subscription-item-actions {
-    display: flex;
-    gap: 8px;
     flex-wrap: wrap;
 }
 
 .subscription-name {
     font-weight: 600;
-    font-size: 1.1rem;
+    font-size: 0.9rem;
+    flex: 1 1 120px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-.subscription-metrics {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 8px;
+.subscription-metric {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    font-size: 0.75rem;
+    white-space: nowrap;
+}
+
+.metric-label {
     color: var(--muted);
-    font-size: 0.95rem;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
-.metric strong {
+.subscription-metric strong {
     color: var(--ink);
+    font-size: 0.82rem;
+}
+
+.subscription-item-actions {
+    display: flex;
+    gap: 5px;
+    flex-shrink: 0;
+    margin-left: auto;
 }
 
 .delete-button {
@@ -266,15 +278,17 @@ input:focus, select:focus, textarea:focus {
 .subscription-item .delete-button {
     color: var(--ink);
     border-color: var(--border);
+    padding: 4px 10px;
+    font-size: 0.78rem;
 }
 
 .edit-button {
     background: rgba(31, 122, 140, 0.1);
     border: 1px solid rgba(31, 122, 140, 0.18);
     color: var(--teal);
-    padding: 6px 12px;
+    padding: 4px 10px;
     border-radius: 999px;
-    font-size: 0.85rem;
+    font-size: 0.78rem;
     cursor: pointer;
 }
 

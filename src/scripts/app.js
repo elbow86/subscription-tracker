@@ -155,35 +155,35 @@ function renderSubscriptions() {
             </div>
         `;
     } else {
-        subscriptions.forEach((subscription) => {
+        [...subscriptions].sort((a, b) => a.name.localeCompare(b.name)).forEach((subscription) => {
             const item = document.createElement('article');
             item.className = 'subscription-item';
 
             const lifetime = subscription.price === null || subscription.years === null
                 ? null : subscription.price * subscription.years;
 
+            const taxSuffix = subscription.plusTax && subscription.price !== null ? ' + tax' : '';
+            const hasNotes = subscription.notes && subscription.notes.trim();
+
             item.innerHTML = `
-                <div class="subscription-item-header">
-                    <div class="subscription-name"></div>
+                <div class="subscription-row">
+                    <span class="subscription-name"></span>
+                    <span class="subscription-metric"><span class="metric-label">Annual</span><strong class="annual-price"></strong></span>
+                    <span class="subscription-metric"><span class="metric-label">Years</span><strong class="years-owned"></strong></span>
+                    <span class="subscription-metric"><span class="metric-label">Lifetime</span><strong class="lifetime-price"></strong></span>
                     <div class="subscription-item-actions">
                         <button class="edit-button" data-action="edit">Edit</button>
                         <button class="delete-button" data-action="delete">Remove</button>
                     </div>
                 </div>
-                <div class="subscription-metrics">
-                    <div class="metric">Price/year: <strong class="annual-price"></strong></div>
-                    <div class="metric">Years owned: <strong class="years-owned"></strong></div>
-                    <div class="metric">Estimated lifetime cost: <strong class="lifetime-price"></strong></div>
-                </div>
-                <p class="subscription-notes"></p>
+                ${hasNotes ? '<p class="subscription-notes"></p>' : ''}
             `;
 
             item.querySelector('.subscription-name').textContent = subscription.name;
-            const taxSuffix = subscription.plusTax && subscription.price !== null ? ' + tax' : '';
             item.querySelector('.annual-price').textContent = formatMoney(subscription.price, subscription.currency) + taxSuffix;
-            item.querySelector('.years-owned').textContent = subscription.years ?? 'Unknown';
+            item.querySelector('.years-owned').textContent = subscription.years ?? '—';
             item.querySelector('.lifetime-price').textContent = formatMoney(lifetime, subscription.currency) + (lifetime === null ? '' : taxSuffix);
-            item.querySelector('.subscription-notes').textContent = subscription.notes ?? '';
+            if (hasNotes) item.querySelector('.subscription-notes').textContent = subscription.notes;
             item.querySelectorAll('button[data-action]').forEach((button) => {
                 button.dataset.id = subscription.id;
             });

@@ -46,6 +46,10 @@ function renderChart() {
         document.getElementById('lowest-cost').textContent = formatMoney(lowest, currencies[data.indexOf(lowest)]);
     }
     
+    // Size the container so every bar gets enough room
+    const chartContainer = document.querySelector('.chart-container');
+    chartContainer.style.height = Math.max(300, subscriptionsWithPrice.length * 44) + 'px';
+
     // Destroy existing chart if it exists
     if (window.subscriptionChart) {
         window.subscriptionChart.destroy();
@@ -96,6 +100,9 @@ function renderChart() {
                     }
                 },
                 y: {
+                    ticks: {
+                        autoSkip: false
+                    },
                     title: {
                         display: true,
                         text: 'Subscription Name'
